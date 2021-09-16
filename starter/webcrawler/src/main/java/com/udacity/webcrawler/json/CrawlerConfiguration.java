@@ -207,7 +207,7 @@ public final class CrawlerConfiguration {
      *
      * @param patterns one or more regular expressions that define a valid {@link Pattern}.
      */
-    @JsonProperty("ignoredURLs")
+    @JsonProperty("ignoredUrls")
     public Builder addIgnoredUrls(String... patterns) {
       for (String pattern : patterns) {
         ignoredUrls.add(Objects.requireNonNull(pattern));
@@ -226,7 +226,7 @@ public final class CrawlerConfiguration {
      *
      * @param patterns one or more regular expressions that define a valid {@link Pattern}.
      */
-    @JsonProperty("patterns")
+    @JsonProperty("ignoredWords")
     public Builder addIgnoredWords(String... patterns) {
       for (String pattern : patterns) {
         ignoredWords.add(Objects.requireNonNull(pattern));

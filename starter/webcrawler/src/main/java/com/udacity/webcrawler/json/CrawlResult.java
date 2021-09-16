@@ -70,6 +70,7 @@ public final class CrawlResult {
     /**
      * Sets the total number of URLs visited. See {@link #getUrlsVisited()}.
      */
+
     public Builder setUrlsVisited(int pageCount) {
       this.pageCount = pageCount;
       return this;

@@ -53,10 +53,11 @@ public final class ConfigurationLoader {
     // This is here to get rid of the unused variable warning.
     Objects.requireNonNull(reader);
     // TODO: Fill in this method
-
     //Create a mapper object for reading in the Json Config data
     ObjectMapper mapper = new ObjectMapper();
-    //mapper.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+
+    //allow calling program to close stream
+    mapper.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
 
     try {
       return mapper.readValue(reader, CrawlerConfiguration.Builder.class).build();
