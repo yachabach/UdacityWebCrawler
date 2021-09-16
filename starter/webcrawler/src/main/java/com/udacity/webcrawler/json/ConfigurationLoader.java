@@ -1,12 +1,19 @@
 package com.udacity.webcrawler.json;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * A static utility class that loads a JSON configuration file.
  */
+@JsonDeserialize(builder = CrawlerConfiguration.Builder.class)
 public final class ConfigurationLoader {
 
   private final Path path;
@@ -26,7 +33,14 @@ public final class ConfigurationLoader {
   public CrawlerConfiguration load() {
     // TODO: Fill in this method.
 
-    return new CrawlerConfiguration.Builder().build();
+    //Use try with resources to ensure closing
+    try (Reader reader = Files.newBufferedReader(path)) {
+      return read(reader);  //Call read method with reader file handle
+                            //read returns a CrawlerConfiguration obj.
+    }catch (IOException ex) {
+      ex.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -40,6 +54,17 @@ public final class ConfigurationLoader {
     Objects.requireNonNull(reader);
     // TODO: Fill in this method
 
-    return new CrawlerConfiguration.Builder().build();
+    //Create a mapper object for reading in the Json Config data
+    ObjectMapper mapper = new ObjectMapper();
+    //mapper.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+
+    try {
+      return mapper.readValue(reader, CrawlerConfiguration.Builder.class).build();
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
+
+    //return null to show fail if we get here;
+    return null;
   }
 }
