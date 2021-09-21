@@ -46,8 +46,10 @@ final class SequentialWebCrawler implements WebCrawler {
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
     Instant deadline = clock.instant().plus(timeout);
-    Map<String, Integer> counts = new HashMap<>();
-    Set<String> visitedUrls = new HashSet<>();
+    Map<String, Integer> counts = new HashMap<>();  //Make this threadable
+    Set<String> visitedUrls = new HashSet<>();      //Make this threadable
+
+    //Initiate crawl down each url in list of roots.
     for (String url : startingUrls) {
       crawlInternal(url, deadline, maxDepth, counts, visitedUrls);
     }
@@ -71,19 +73,29 @@ final class SequentialWebCrawler implements WebCrawler {
       int maxDepth,
       Map<String, Integer> counts,
       Set<String> visitedUrls) {
+
+    //Check that we haven't timed out
     if (maxDepth == 0 || clock.instant().isAfter(deadline)) {
       return;
     }
+
+    //Skip urls that match the ignoredUrls pattern
     for (Pattern pattern : ignoredUrls) {
       if (pattern.matcher(url).matches()) {
         return;
       }
     }
+
+    //skip urls that have already been visited
     if (visitedUrls.contains(url)) {
       return;
     }
+
+
     visitedUrls.add(url);
     PageParser.Result result = parserFactory.get(url).parse();
+
+    //Update word counts
     for (Map.Entry<String, Integer> e : result.getWordCounts().entrySet()) {
       if (counts.containsKey(e.getKey())) {
         counts.put(e.getKey(), e.getValue() + counts.get(e.getKey()));
@@ -91,6 +103,8 @@ final class SequentialWebCrawler implements WebCrawler {
         counts.put(e.getKey(), e.getValue());
       }
     }
+
+    //Recurse down the tree of links within this url
     for (String link : result.getLinks()) {
       crawlInternal(link, deadline, maxDepth - 1, counts, visitedUrls);
     }
