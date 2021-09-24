@@ -19,7 +19,7 @@ public interface PageParser {
   /**
    * Processes the HTML page and returns a {@link Result} for the page.
    */
-  @Profiled
+  @Profiled //Tag for performance monitoring
   Result parse();
 
   /**

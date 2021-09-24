@@ -45,7 +45,12 @@ final class SequentialWebCrawler implements WebCrawler {
 
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
+
+    //Set a timeout
     Instant deadline = clock.instant().plus(timeout);
+
+    //Repositories for word counts and visited urls.  In a parallel
+    // implementation these will have to be concurrency-aware.
     Map<String, Integer> counts = new HashMap<>();  //Make this threadable
     Set<String> visitedUrls = new HashSet<>();      //Make this threadable
 
@@ -86,13 +91,20 @@ final class SequentialWebCrawler implements WebCrawler {
       }
     }
 
-    //skip urls that have already been visited
+    /*
+    skip urls that have already been visited
+
+    We should lock this Set here so that it is not modified
+    by another thread
+     */
     if (visitedUrls.contains(url)) {
       return;
     }
 
-
+    //Add this url to the list of visited
     visitedUrls.add(url);
+    //We will unlock visitedUrls here to keep execution running
+
     PageParser.Result result = parserFactory.get(url).parse();
 
     //Update word counts
