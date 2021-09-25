@@ -72,6 +72,7 @@ final class SequentialWebCrawler implements WebCrawler {
         .build();
   }
 
+  //Recursive crawl function
   private void crawlInternal(
       String url,
       Instant deadline,
@@ -105,6 +106,7 @@ final class SequentialWebCrawler implements WebCrawler {
     visitedUrls.add(url);
     //We will unlock visitedUrls here to keep execution running
 
+    //Parse the page
     PageParser.Result result = parserFactory.get(url).parse();
 
     //Update word counts

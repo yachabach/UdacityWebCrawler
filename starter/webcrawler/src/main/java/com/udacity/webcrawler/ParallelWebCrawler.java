@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  * {@link ForkJoinPool} to fetch and process multiple web pages in parallel.
  */
 final class ParallelWebCrawler implements WebCrawler {
+
   private final Clock clock;
   private final Duration timeout;
   private final int popularWordCount;
@@ -44,6 +45,9 @@ final class ParallelWebCrawler implements WebCrawler {
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
 
+    //Set a timeout
+    Instant deadline = clock.instant().plus(timeout);
+
     /*Repositories for word counts and visited urls.  In a parallel
     implementation these will have to be thread safe.
 
@@ -56,62 +60,13 @@ final class ParallelWebCrawler implements WebCrawler {
     //Get the PageParser object from Guice
     Injector injector = Guice.createInjector(new ParserModule.Builder().build());
     PageParserFactory parserFactory = injector.getInstance(PageParserFactory.class);
+
+    //Initiate the crawl at each root url
     for (String url: startingUrls) {
-      PageParser.Result result = parserFactory.get(url).parse();
+      pool.invoke(CrawlAction.setUrl(url));
     }
 
     return new CrawlResult.Builder().build();
-  }
-
-  private void crawlInternal(
-          String url,
-          Instant deadline,
-          int maxDepth,
-          Map<String, Integer> counts,
-          Set<String> visitedUrls) {
-
-    //Check that we haven't timed out
-    if (maxDepth == 0 || clock.instant().isAfter(deadline)) {
-      return;
-    }
-
-    //Skip urls that match the ignoredUrls pattern
-    for (Pattern pattern : ignoredUrls) {
-      if (pattern.matcher(url).matches()) {
-        return;
-      }
-    }
-
-    /*
-    skip urls that have already been visited
-
-    We will lock this Set here so that it is not modified
-    by another thread between reading and updating.
-     */
-    synchronized (visitedUrls) {
-      if (visitedUrls.contains(url)) {
-        return;
-      }
-      //Add this url to the list of visited
-      visitedUrls.add(url);
-      //We will unlock visitedUrls here to keep execution running
-    }
-
-    PageParser.Result result = parserFactory.get(url).parse();
-
-    //Update word counts
-    for (Map.Entry<String, Integer> e : result.getWordCounts().entrySet()) {
-      if (counts.containsKey(e.getKey())) {
-        counts.put(e.getKey(), e.getValue() + counts.get(e.getKey()));
-      } else {
-        counts.put(e.getKey(), e.getValue());
-      }
-    }
-
-    //Recurse down the tree of links within this url
-    for (String link : result.getLinks()) {
-      crawlInternal(link, deadline, maxDepth - 1, counts, visitedUrls);
-    }
   }
 
   @Override
