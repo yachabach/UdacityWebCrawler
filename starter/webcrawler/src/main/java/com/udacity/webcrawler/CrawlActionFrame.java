@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.RecursiveTask;
 import java.util.regex.Pattern;
 
 /**
@@ -24,11 +23,9 @@ import java.util.regex.Pattern;
  * maxDepth is decremented, url is the root of further crawls through
  * a web page.</p>
  */
-public final class CrawlAction extends RecursiveAction {
+public final class CrawlActionFrame {
 
-    private final String url;
     private final Instant deadline;
-    private final int maxDepth;
     private final Clock clock;
     private final List<Pattern> ignoredUrls;
     private final PageParserFactory parserFactory;
@@ -38,19 +35,15 @@ public final class CrawlAction extends RecursiveAction {
 
 
     @Inject
-    private CrawlAction(String url,
-                        Instant deadline,
-                        int maxDepth,
-                        Clock clock,
-                        List<Pattern> ignoredUrls,
-                        PageParserFactory parserFactory,
-                        Map<String, Integer> counts,
-                        Set<String> visitedUrls,
-                        ForkJoinPool pool){
+    private CrawlActionFrame(Instant deadline,
+                             Clock clock,
+                             List<Pattern> ignoredUrls,
+                             PageParserFactory parserFactory,
+                             Map<String, Integer> counts,
+                             Set<String> visitedUrls,
+                             ForkJoinPool pool){
 
-        this.url = url;
         this.deadline = deadline;
-        this.maxDepth = maxDepth;
         this.clock = clock;
         this.ignoredUrls = ignoredUrls;
         this.parserFactory = parserFactory;
@@ -60,9 +53,7 @@ public final class CrawlAction extends RecursiveAction {
     }
 
     public static final class Builder {
-        private String url;
         private Instant deadline;
-        private int maxDepth;
         private Clock clock;
         private List<Pattern> ignoredUrls;
         private PageParserFactory parserFactory;
@@ -70,18 +61,8 @@ public final class CrawlAction extends RecursiveAction {
         private Set<String> visitedUrls;
         private ForkJoinPool pool;
 
-        public Builder setUrl(String url) {
-            this.url = Objects.requireNonNull(url);
-            return this;
-        }
-
         public Builder setDeadline(Instant deadline){
             this.deadline = Objects.requireNonNull(deadline);
-            return this;
-        }
-
-        public Builder setMaxDepth(int maxDepth){
-            this.maxDepth = Objects.requireNonNull(maxDepth);
             return this;
         }
 
@@ -115,11 +96,9 @@ public final class CrawlAction extends RecursiveAction {
             return this;
         }
 
-        public CrawlAction build(){
-            return new CrawlAction(
-                    url,
+        public CrawlActionFrame build(){
+            return new CrawlActionFrame(
                     deadline,
-                    maxDepth,
                     clock,
                     ignoredUrls,
                     parserFactory,
@@ -129,60 +108,31 @@ public final class CrawlAction extends RecursiveAction {
         }
     }
 
-    /**
-     * Code to be executed in a RecursiveAction invocation
-     */
-    @Override
-    protected void compute() {
-
-        //Check that we haven't timed out
-        if (maxDepth == 0 || clock.instant().isAfter(deadline)) {
-            return;
-        }
-
-        //Skip urls that match the ignoredUrls pattern
-        for (Pattern pattern : ignoredUrls) {
-            if (pattern.matcher(url).matches()) {
-                return;
-            }
-        }
-
-    /*
-    skip urls that have already been visited
-    Lock this Set in a synchronized block until
-    the update is complete
-     */
-        synchronized (visitedUrls){
-            if (visitedUrls.contains(url)) {
-                return;
-            }
-
-            //Add this url to the list of visited
-            visitedUrls.add(url);
-            //Unlock visitedUrls here to keep execution running
-        }
-
-        //Get results from this URL
-        PageParser.Result result = parserFactory.get(url).parse();
-
-        //Record the results by updating word counts
-        for (Map.Entry<String, Integer> e : result.getWordCounts().entrySet()) {
-            if (counts.containsKey(e.getKey())) {
-                counts.put(e.getKey(), e.getValue() + counts.get(e.getKey()));
-            } else {
-                counts.put(e.getKey(), e.getValue());
-            }
-        }
-
-        //Results also included a list of embedded URLs
-        // Recurse down the list of links
-        for (String link : result.getLinks()) {
-            CrawlAction crawlAction = new Builder()
-                    .setMaxDepth(maxDepth-1)
-                            .setUrl(link)
-                                    .build();
-            pool.invoke(crawlAction);
-        }
+    public Clock getClock() {
+        return clock;
     }
 
+    public Instant getDeadline() {
+        return deadline;
+    }
+
+    public ForkJoinPool getPool() {
+        return pool;
+    }
+
+    public PageParserFactory getParserFactory() {
+        return parserFactory;
+    }
+
+    public List<Pattern> getIgnoredUrls() {
+        return ignoredUrls;
+    }
+
+    public Set<String> getVisitedUrls() {
+        return visitedUrls;
+    }
+
+    public Map<String, Integer> getCounts() {
+        return counts;
+    }
 }

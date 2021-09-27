@@ -29,17 +29,23 @@ final class ParallelWebCrawler implements WebCrawler {
   private final Duration timeout;
   private final int popularWordCount;
   private final ForkJoinPool pool;
+  private final int maxDepth;
+  private final List<Pattern> ignoredUrls;
 
   @Inject
   ParallelWebCrawler(
       Clock clock,
       @Timeout Duration timeout,
       @PopularWordCount int popularWordCount,
-      @TargetParallelism int threadCount) {
+      @TargetParallelism int threadCount,
+      @MaxDepth int maxDepth,
+      @IgnoredUrls List<Pattern> ignoredUrls) {
     this.clock = clock;
     this.timeout = timeout;
     this.popularWordCount = popularWordCount;
     this.pool = new ForkJoinPool(Math.min(threadCount, getMaxParallelism()));
+    this.ignoredUrls = ignoredUrls;
+    this.maxDepth = maxDepth;
   }
 
   @Override
@@ -61,9 +67,20 @@ final class ParallelWebCrawler implements WebCrawler {
     Injector injector = Guice.createInjector(new ParserModule.Builder().build());
     PageParserFactory parserFactory = injector.getInstance(PageParserFactory.class);
 
+    CrawlActionFrame cAF = new CrawlActionFrame.Builder()
+            .setClock(clock)
+            .setCounts(counts)
+            .setDeadline(deadline)
+            .setPool(pool)
+            .setIgnoredUrls(ignoredUrls)
+            .setParserFactory(parserFactory)
+            .setVisitedUrls(visitedUrls)
+            .build();
+
     //Initiate the crawl at each root url
     for (String url: startingUrls) {
-      pool.invoke(CrawlAction.setUrl(url));
+      CrawlActionImpl crawlAction = new CrawlActionImpl(url, maxDepth, cAF);
+      pool.invoke(crawlAction);
     }
 
     return new CrawlResult.Builder().build();
