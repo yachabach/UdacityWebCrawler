@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -15,67 +17,43 @@ import java.util.Objects;
 final class ProfilingMethodInterceptor implements InvocationHandler {
 
   private final Clock clock;
-  private ProfilingState state = new ProfilingState();
-  private final ZonedDateTime startTime;
+  private final Object target;
+  private final ProfilingState state;
 
   // TODO: You will need to add more instance fields and constructor arguments to this class.
   ProfilingMethodInterceptor(Clock clock,
-                             ProfilingState state,
-                             ZonedDateTime startTime) {
+                             Object target, //The wrap method called this delegate
+                             ProfilingState state) {
     this.clock = Objects.requireNonNull(clock);
+    this.target = Objects.requireNonNull(target);
     this.state = Objects.requireNonNull(state);
-    this.startTime = Objects.requireNonNull(startTime);
-
   }
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] args) {
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     // TODO: This method interceptor should inspect the called method to see if it is a profiled
     //       method. For profiled methods, the interceptor should record the start time, then
     //       invoke the method using the object that is being profiled. Finally, for profiled
     //       methods, the interceptor should record how long the method call took, using the
     //       ProfilingState methods.
 
-    /*From Udacisearch example
-    // TODO: Fill this method in!
-
-    String methodName = method.getName(); //This will be 'get'-something/
-
-      /*
-      This part is very confusing and poorly explained.  Basically, if the method
-      throws an exception then this code re-throws the exception.  I don't understand
-      how we get here or why.
-       */
-    /*if (method.getDeclaringClass().equals(Object.class)) {
+    Object result = null;
+    //Check that the called method has a profiled decorator
+    if (method.isAnnotationPresent(Profiled.class)) {
+      //Start the timer
+      final Instant startTime = clock.instant();
+      //Invoke the method
       try {
-        return method.invoke(properties, args);
+        result = method.invoke(target, args);
       } catch (InvocationTargetException e) {
         throw e.getTargetException();
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
+      } catch (Exception e) {  // IllegalAccessException iae) {
+        throw e;  //new RuntimeException(iae);
+      } finally {
+        state.record(target.getClass(), method,
+                Duration.between(startTime, clock.instant()));
       }
-
-    }
-
-    //Here we make sure it's a valid property name
-    if (methodName.length() <= 3 || !methodName.startsWith("get")) {
-      throw new RuntimeException("Method is not a property getter: " + methodName);
-    }
-
-    //Filter the 'get' out of the method name to end up with a property name (hopefully)
-    String propertyName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-
-    //If the property doesn't exist we throw a runtime error.
-    if (!properties.containsKey(propertyName)) {
-      throw new RuntimeException("No property named \"" + propertyName + "\" found in map.");
-    }
-
-      /*
-      Here is where the real adapting happens.  Instead of using the this.propertyName to return
-      a state value, we retrieve the value from the properties map using the property name as the
-      index.
-       */
-    //return properties.get(propertyName);    }*/
-    return null;
+    } else result = method.invoke(target, args);
+    return result;
   }
 }

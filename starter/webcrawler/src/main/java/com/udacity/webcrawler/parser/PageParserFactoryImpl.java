@@ -28,6 +28,7 @@ final class PageParserFactoryImpl implements PageParserFactory {
   public PageParser get(String url) {
     // Here, parse the page with the initial timeout (instead of just the time remaining), to make
     // the download less likely to fail. Deadline enforcement should happen at a higher level.
+    //Wrap the PageParser in the Profiler invocation handler.
     PageParser delegate = new PageParserImpl(url, timeout, ignoredWords);
     return profiler.wrap(PageParser.class, delegate);
   }
