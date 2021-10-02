@@ -50,7 +50,7 @@ final class ProfilerImpl implements Profiler {
 
     /*
     klass is the blueprint.  delegate is the object (the instantiation of
-    the klass.  We use klass to tell the proxy how to load the object and
+    klass).  We use klass to tell the proxy how to load the object and
     what interfaces the object will use.  The method interceptor needs
     the delegate.  The newProxyInstance does not.
      */
@@ -58,14 +58,11 @@ final class ProfilerImpl implements Profiler {
     if (!isAnyMethodProfiled(klass))
       throw new IllegalArgumentException("No methods annotated with @Profiled");
 
-    T proxy = null;
-    Method[] methods = klass.getMethods();
-    for (Method m : methods) {
-      proxy = (T) Proxy.newProxyInstance(klass.getClassLoader(),
+    T proxy = (T) Proxy.newProxyInstance(klass.getClassLoader(),
               new Class<?>[]{klass},
               new ProfilingMethodInterceptor(clock, delegate, state));
-    }
-    return (T) proxy;
+
+    return proxy;
   }
 
   private boolean isAnyMethodProfiled(Class<?> klass) {
