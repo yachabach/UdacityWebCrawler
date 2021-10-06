@@ -1,7 +1,10 @@
 package com.udacity.webcrawler.parser;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.udacity.webcrawler.Timeout;
 import com.udacity.webcrawler.profiler.Profiler;
+import com.udacity.webcrawler.profiler.ProfilerModule;
 
 import javax.inject.Inject;
 import java.time.Duration;
@@ -18,7 +21,9 @@ final class PageParserFactoryImpl implements PageParserFactory {
 
   @Inject
   PageParserFactoryImpl(
-      Profiler profiler, @IgnoredWords List<Pattern> ignoredWords, @Timeout Duration timeout) {
+      Profiler profiler,
+      @IgnoredWords List<Pattern> ignoredWords,
+      @Timeout Duration timeout) {
     this.profiler = profiler;
     this.ignoredWords = ignoredWords;
     this.timeout = timeout;
@@ -29,6 +34,8 @@ final class PageParserFactoryImpl implements PageParserFactory {
     // Here, parse the page with the initial timeout (instead of just the time remaining), to make
     // the download less likely to fail. Deadline enforcement should happen at a higher level.
     //Wrap the PageParser in the Profiler invocation handler.
+    Injector injector = Guice.createInjector(new ProfilerModule());
+    Profiler profiler = injector.getInstance(Profiler.class);
     PageParser delegate = new PageParserImpl(url, timeout, ignoredWords);
     return profiler.wrap(PageParser.class, delegate);
   }

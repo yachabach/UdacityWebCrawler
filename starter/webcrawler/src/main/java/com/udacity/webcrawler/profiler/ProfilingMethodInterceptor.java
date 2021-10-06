@@ -29,6 +29,14 @@ final class ProfilingMethodInterceptor implements InvocationHandler {
     this.state = Objects.requireNonNull(state);
   }
 
+  /*
+  These verbose comments are for me (the student).  I am struggling to fully
+  understand proxy objects.
+
+  When a method in a proxy object is called, this is the function that handles
+  that method invocation.  The method that was called is passed in 'method' and
+  the arguments for that method live in the array called 'args'.
+   */
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     // TODO: This method interceptor should inspect the called method to see if it is a profiled
@@ -42,17 +50,21 @@ final class ProfilingMethodInterceptor implements InvocationHandler {
     if (method.isAnnotationPresent(Profiled.class)) {
       //Start the timer
       final Instant startTime = clock.instant();
-      //Invoke the method
+
+      //Invoke the method while catching and passing on exceptions
       try {
         result = method.invoke(target, args);
       } catch (InvocationTargetException e) {
         throw e.getTargetException();
-      } catch (Exception e) {  // IllegalAccessException iae) {
-        throw e;  //new RuntimeException(iae);
+      } catch (Exception e) {  // IllegalAccessException e) {
+        throw e;  //new RuntimeException(e);
       } finally {
+        //Record the execution time
         state.record(target.getClass(), method,
                 Duration.between(startTime, clock.instant()));
       }
+
+      //If the method is not annotated, run it and return the result
     } else result = method.invoke(target, args);
     return result;
   }

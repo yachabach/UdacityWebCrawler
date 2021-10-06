@@ -52,7 +52,7 @@ final class ProfilerImpl implements Profiler {
     klass is the blueprint.  delegate is the object (the instantiation of
     klass).  We use klass to tell the proxy how to load the object and
     what interfaces the object will use.  The method interceptor needs
-    the delegate.  The newProxyInstance does not.
+    the delegate (called 'target' in -Impl) for the method.invoke() function.
      */
 
     if (!isAnyMethodProfiled(klass))

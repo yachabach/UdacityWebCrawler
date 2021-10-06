@@ -32,6 +32,8 @@ final class ParallelWebCrawler implements WebCrawler {
   private final int maxDepth;
   private final List<Pattern> ignoredUrls;
 
+  @Inject PageParserFactory parserFactory;
+
   @Inject
   ParallelWebCrawler(
       Clock clock,
@@ -51,8 +53,10 @@ final class ParallelWebCrawler implements WebCrawler {
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
 
+    System.out.println("Started Parallel crawler");
     //Set a timeout
     Instant deadline = clock.instant().plus(timeout);
+    System.out.println("Crawler set the deadline");
 
     /*Repositories for word counts and visited urls.  In a parallel
     implementation these will have to be thread safe.
@@ -64,9 +68,13 @@ final class ParallelWebCrawler implements WebCrawler {
     Set<String> visitedUrls = Collections.synchronizedSet(new HashSet<>());
 
     //Get the PageParser object from Guice
-    Injector injector = Guice.createInjector(new ParserModule.Builder().build());
-    PageParserFactory parserFactory = injector.getInstance(PageParserFactory.class);
 
+    //Injector injector = Guice.createInjector(new ParserModule());
+    //System.out.println("Created injector");
+    //PageParserFactory parserFactory = injector.getInstance(PageParserFactory.class);
+    //System.out.println("Created parserFactory");
+
+    System.out.println("Starting Crawl Action");
     CrawlActionFrame cAF = new CrawlActionFrame.Builder()
             .setClock(clock)
             .setCounts(counts)

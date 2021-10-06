@@ -54,8 +54,8 @@ public final class WebCrawlerModule extends AbstractModule {
     bind(Key.get(Integer.class, MaxDepth.class)).toInstance(config.getMaxDepth());
     bind(Key.get(Integer.class, PopularWordCount.class)).toInstance(config.getPopularWordCount());
     bind(Key.get(Duration.class, Timeout.class)).toInstance(config.getTimeout());
-    bind(new Key<List<Pattern>>(IgnoredUrls.class) {
-    }).toInstance(config.getIgnoredUrls());
+    bind(new Key<List<Pattern>>(IgnoredUrls.class){}).toInstance(config.getIgnoredUrls());
+
 
     install(
         new ParserModule.Builder()

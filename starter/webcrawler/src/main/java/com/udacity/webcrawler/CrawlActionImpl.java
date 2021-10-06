@@ -68,9 +68,8 @@ public final class CrawlActionImpl extends RecursiveAction {
         }
 
     /*
-    skip urls that have already been visited
-    Lock this Set in a synchronized block until
-    the update is complete
+    skip urls that have already been visited.  Lock this Set in a synchronized
+    block until the update is complete
      */
         Set<String> visitedUrls = cAF.getVisitedUrls();
         synchronized (visitedUrls){
