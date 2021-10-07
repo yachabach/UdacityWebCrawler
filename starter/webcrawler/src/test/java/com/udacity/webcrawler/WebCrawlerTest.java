@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.inject.Inject;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public final class WebCrawlerTest {
     List<Class<?>> classes = new ArrayList<>();
     for (String name : names) {
       classes.add(Class.forName(name.strip())); //Turns strings into classes
+      //System.out.println("Test Parameter: " + name);
     }
 
     return classes.stream();
@@ -45,6 +47,7 @@ public final class WebCrawlerTest {
 
   @Test //12
   public void testOverrideToSequential() {
+    System.out.println("Started testOverrideToSequential");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(SequentialWebCrawler.class.getName())
@@ -53,10 +56,12 @@ public final class WebCrawlerTest {
     Guice.createInjector(new WebCrawlerModule(config), new NoOpProfilerModule())
         .injectMembers(this);
     assertThat(crawler.getClass()).isAssignableTo(SequentialWebCrawler.class);
+    System.out.println("Completed testOverrideToSequential");
   }
 
   @Test //4
   public void testOverrideToParallel() {
+    System.out.println("Started testOverrideToParallel");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(ParallelWebCrawler.class.getName())
@@ -69,6 +74,7 @@ public final class WebCrawlerTest {
 
   @Test //5
   public void testSequentialParallelism() {
+    System.out.println("Started testSequentialParallelism");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setParallelism(1)
@@ -80,6 +86,7 @@ public final class WebCrawlerTest {
 
   @Test //1
   public void testParallelParallelism() {
+    System.out.println("Started testParallelParallelism");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setParallelism(2)
@@ -92,6 +99,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void zeroMaxDepth(Class<?> crawlerClass) {
+    System.out.println("Started zeroMaxDepth--------------------------------");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -112,6 +120,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void noStartPages(Class<?> crawlerClass) {
+    System.out.println("Started noStartPages");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -132,6 +141,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void testBasicCrawl(Class<?> crawlerClass) {
+    System.out.println("Started testBasicCrawl -------------------------------------");
 
     /*
     We first create a configuration definition for the crawler
@@ -147,13 +157,19 @@ public final class WebCrawlerTest {
     Guice.createInjector(new WebCrawlerModule(config), new NoOpProfilerModule())
         .injectMembers(this);
 
+    System.out.println("Name of crawlerClass: " + crawlerClass.getName() + "\n" +
+            "Class of crawler: " + crawler.getClass());
+
     assertThat(crawler.getClass()).isAssignableTo(crawlerClass);
+    System.out.println("Crawler is the right implementation: " + crawler.getClass().isAssignableFrom(crawlerClass));
 
     CrawlResult result = crawler.crawl(config.getStartPages());
+      System.out.println("Got a crawl result");
 
     assertWithMessage("Returned the wrong number of popular words")
         .that(result.getUrlsVisited())
         .isEqualTo(3);
+    System.out.println("result.getUrlsVisited: " + result.getUrlsVisited());
 
     assertWithMessage("Returned the correct number of popular words, but the wrong words or counts")
         .that(result.getWordCounts())
@@ -176,6 +192,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void respectsIgnoredUrls(Class<?> crawlerClass) {
+    System.out.println("Started respectsIgnoredUrls");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -204,6 +221,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void respectsIgnoredWords(Class<?> crawlerClass) {
+    System.out.println("Started respectsIgnoredWords");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -231,6 +249,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void respectsMaxDepth(Class<?> crawlerClass) {
+    System.out.println("Started respectsMaxDepth");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -262,6 +281,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void pageNotFoundStillCountsAsVisited(Class<?> crawlerClass) {
+    System.out.println("Started pageNotFoundStillCountsAsVisited");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -293,6 +313,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void infiniteLoop(Class<?> crawlerClass) {
+    System.out.println("Started infiniteLoop");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())
@@ -319,6 +340,7 @@ public final class WebCrawlerTest {
   @ParameterizedTest
   @MethodSource("provideTestParameters")
   public void multipleStartingUrls(Class<?> crawlerClass) {
+    System.out.println("Started multipleStartingUrls");
     CrawlerConfiguration config =
         new CrawlerConfiguration.Builder()
             .setImplementationOverride(crawlerClass.getName())

@@ -1,16 +1,23 @@
 package com.udacity.webcrawler;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.udacity.webcrawler.json.CrawlResult;
+import com.udacity.webcrawler.parser.PageParser;
 import com.udacity.webcrawler.parser.PageParserFactory;
+import com.udacity.webcrawler.parser.ParserModule;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A concrete implementation of {@link WebCrawler} that runs multiple threads on a
@@ -65,8 +72,8 @@ final class ParallelWebCrawler implements WebCrawler {
 
     /*
     CrawlActionFrame is a class used to pass parameters that remain unchanged
-    to the RecursiveAction class CrawlAction.  These variables should live in
-    CrawlAction but I was unable to debug that design.  This was a solution to
+    to the RecursiveAction class CrawlActionImpl.  These variables should live in
+    CrawlActionImpl but I was unable to debug that design.  This was a solution to
     complete the assignment.
      */
     CrawlActionFrame cAF = new CrawlActionFrame.Builder()

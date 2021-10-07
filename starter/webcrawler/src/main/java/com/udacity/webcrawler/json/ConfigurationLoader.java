@@ -10,8 +10,14 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-/**
+/*
  * A static utility class that loads a JSON configuration file.
+ *
+ * JsonDeserialize annotation is used to inform Jackson of the
+ * class that binds keys to variables.  This is similar to the
+ * bind methods in Guice.
+ *
+ * In
  */
 @JsonDeserialize(builder = CrawlerConfiguration.Builder.class)
 public final class ConfigurationLoader {
@@ -20,6 +26,9 @@ public final class ConfigurationLoader {
 
   /**
    * Create a {@link ConfigurationLoader} that loads configuration from the given {@link Path}.
+   *
+   * <p>This is the Path to a JSON file.  Jackson will be used to parse the
+   * JSON file to a CrawlerConfiguration object.</p>
    */
   public ConfigurationLoader(Path path) {
     this.path = Objects.requireNonNull(path);

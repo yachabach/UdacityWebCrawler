@@ -43,7 +43,6 @@ public final class CrawlActionImpl extends RecursiveAction {
     public void setUrl(String url) {
         this.url = Objects.requireNonNull(url);
     }
-
     public void setMaxDepth(int maxDepth){
         this.maxDepth = Objects.requireNonNull(maxDepth);
     }
@@ -54,6 +53,9 @@ public final class CrawlActionImpl extends RecursiveAction {
     @Override
     protected void compute() {
 
+        System.out.println("Current thread count: "+ cAF.getPool().getActiveThreadCount());
+        System.out.println("Current thread id: " + Thread.currentThread().getId());
+        System.out.println("Current max depth: " + maxDepth);
         //Check that we haven't timed out
         if (maxDepth == 0 ||
                 cAF.getClock().instant().isAfter(cAF.getDeadline())) {
@@ -83,6 +85,7 @@ public final class CrawlActionImpl extends RecursiveAction {
         }
 
         //Get results from this URL
+
         PageParser.Result result = cAF.getParserFactory().get(url).parse();
 
         //Record the results by updating word counts
@@ -98,9 +101,12 @@ public final class CrawlActionImpl extends RecursiveAction {
         //Results also included a list of embedded URLs
         // Recurse down the list of links
         for (String link : result.getLinks()) {
+            System.out.println("Links found on " + url + ": " + result.getLinks().size());
+            System.out.println("Going to link: " + link + " with maxDepth: " + maxDepth);
             CrawlActionImpl crawlAction =
                     new CrawlActionImpl(link, maxDepth-1, cAF);
             cAF.getPool().invoke(crawlAction);
+            System.out.println("Returned from crawling: " + link);
         }
     }
 }
