@@ -19,6 +19,11 @@ final class PageParserFactoryImpl implements PageParserFactory {
   private final List<Pattern> ignoredWords;
   private final Duration timeout;
 
+  /*
+  This Inject annotation is for Ignored words and Timeout.  Profiler was
+  injected in WebCrawlerMain.
+   */
+
   @Inject
   PageParserFactoryImpl(
       Profiler profiler,

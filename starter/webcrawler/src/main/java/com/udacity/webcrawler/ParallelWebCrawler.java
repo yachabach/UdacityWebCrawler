@@ -60,8 +60,8 @@ final class ParallelWebCrawler implements WebCrawler {
 
     /*
     CrawlActionFrame is a class used to pass parameters that remain unchanged
-    to the RecursiveAction class CrawlAction.  These variables should live in
-    CrawlAction but I was unable to debug that design.  This was a solution to
+    to the RecursiveAction class CrawlActionImpl.  These variables should live in
+    CrawlActionImpl but I was unable to debug that design.  This was a solution to
     complete the assignment.
      */
     CrawlActionFrame cAF = new CrawlActionFrame.Builder()
