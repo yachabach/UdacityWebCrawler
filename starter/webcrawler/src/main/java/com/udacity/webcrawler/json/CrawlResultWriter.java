@@ -61,6 +61,12 @@ public final class CrawlResultWriter {
     // This is here to get rid of the unused variable warning.
     Objects.requireNonNull(writer);
     // TODO: Fill in this method.
+
+    /*
+    The ObjectMapper closes the stream with each writeValue.  We have to
+    disable this default feature with AUTO_CLOSE_TARGET.
+    https://github.com/msgpack/msgpack-java/issues/233
+     */
     ObjectMapper mapper = new ObjectMapper();
     mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
 

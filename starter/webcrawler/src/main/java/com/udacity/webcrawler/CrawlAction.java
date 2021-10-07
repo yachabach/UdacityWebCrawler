@@ -37,7 +37,7 @@ public final class CrawlAction extends RecursiveAction {
     private final ForkJoinPool pool;
 
 
-    @Inject
+    @Inject //This injection is for parserFactory
     private CrawlAction(String url,
                         Instant deadline,
                         int maxDepth,

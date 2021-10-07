@@ -35,17 +35,23 @@ public final class WebCrawlerMain {
   private void run() throws Exception {
     Guice.createInjector(new WebCrawlerModule(config), new ProfilerModule()).injectMembers(this);
 
+    //Crawl the given pages
     CrawlResult result = crawler.crawl(config.getStartPages());
+
+    //Create an object to write results in a JSON format
     CrawlResultWriter resultWriter = new CrawlResultWriter(result);
     // TODO: Write the crawl results to a JSON file (or System.out if the file name is empty)
 
-    CrawlResultWriter writer = new CrawlResultWriter(result);
+    /*
+    Here we simply establish the connection to the output receiver - either the
+    console or a path to a file or other storage.
+     */
     if (config.getResultPath().isEmpty()) {
       Writer out = new BufferedWriter(new OutputStreamWriter(System.out));
-      writer.write(out);
+      resultWriter.write(out);
     } else {
       Path path = Path.of(config.getResultPath());
-      writer.write(path);
+      resultWriter.write(path);
     }
     // TODO: Write the profile data to a text file (or System.out if the file name is empty)
   }

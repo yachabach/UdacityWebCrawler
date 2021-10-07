@@ -34,8 +34,8 @@ final class PageParserFactoryImpl implements PageParserFactory {
     // Here, parse the page with the initial timeout (instead of just the time remaining), to make
     // the download less likely to fail. Deadline enforcement should happen at a higher level.
     //Wrap the PageParser in the Profiler invocation handler.
-    Injector injector = Guice.createInjector(new ProfilerModule());
-    Profiler profiler = injector.getInstance(Profiler.class);
+    //Injector injector = Guice.createInjector(new ProfilerModule());
+   // Profiler profiler = injector.getInstance(Profiler.class);
     PageParser delegate = new PageParserImpl(url, timeout, ignoredWords);
     return profiler.wrap(PageParser.class, delegate);
   }

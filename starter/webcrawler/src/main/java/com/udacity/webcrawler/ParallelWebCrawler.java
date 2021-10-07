@@ -53,10 +53,8 @@ final class ParallelWebCrawler implements WebCrawler {
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
 
-    System.out.println("Started Parallel crawler");
     //Set a timeout
     Instant deadline = clock.instant().plus(timeout);
-    System.out.println("Crawler set the deadline");
 
     /*Repositories for word counts and visited urls.  In a parallel
     implementation these will have to be thread safe.
@@ -67,14 +65,12 @@ final class ParallelWebCrawler implements WebCrawler {
     Map<String, Integer> counts = new ConcurrentHashMap<>();
     Set<String> visitedUrls = Collections.synchronizedSet(new HashSet<>());
 
-    //Get the PageParser object from Guice
-
-    //Injector injector = Guice.createInjector(new ParserModule());
-    //System.out.println("Created injector");
-    //PageParserFactory parserFactory = injector.getInstance(PageParserFactory.class);
-    //System.out.println("Created parserFactory");
-
-    System.out.println("Starting Crawl Action");
+    /*
+    CrawlActionFrame is a class used to pass parameters that remain unchanged
+    to the RecursiveAction class CrawlAction.  These variables should live in
+    CrawlAction but I was unable to debug that design.  This was a solution to
+    complete the assignment.
+     */
     CrawlActionFrame cAF = new CrawlActionFrame.Builder()
             .setClock(clock)
             .setCounts(counts)
@@ -91,7 +87,17 @@ final class ParallelWebCrawler implements WebCrawler {
       pool.invoke(crawlAction);
     }
 
-    return new CrawlResult.Builder().build();
+    if (counts.isEmpty()) {
+      return new CrawlResult.Builder()
+              .setWordCounts(counts)
+              .setUrlsVisited(visitedUrls.size())
+              .build();
+    }
+
+    return new CrawlResult.Builder()
+            .setWordCounts(WordCounts.sort(counts, popularWordCount))
+            .setUrlsVisited(visitedUrls.size())
+            .build();
   }
 
   @Override

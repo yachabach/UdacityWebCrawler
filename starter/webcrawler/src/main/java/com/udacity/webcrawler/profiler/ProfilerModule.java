@@ -15,6 +15,6 @@ public final class ProfilerModule extends AbstractModule {
   @Provides
   @Singleton
   Profiler provideProfiler(Clock clock) {
-    return new ProfilerImpl(clock);
+    return new ProfilerImpl(Clock.systemUTC());  // clock);
   }
 }
