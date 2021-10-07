@@ -1,6 +1,5 @@
 package com.udacity.webcrawler;
 
-import com.udacity.webcrawler.parser.PageParser;
 import com.udacity.webcrawler.parser.PageParserFactory;
 
 import javax.inject.Inject;
@@ -11,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
 import java.util.regex.Pattern;
 
 /**
