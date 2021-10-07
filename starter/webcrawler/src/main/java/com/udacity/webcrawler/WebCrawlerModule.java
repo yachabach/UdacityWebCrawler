@@ -44,7 +44,12 @@ public final class WebCrawlerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // Multibinder provides a way to implement the strategy pattern through dependency injection.
+    /*
+     Multibinder provides a way to implement the strategy pattern through dependency injection.
+
+     This is how crawler is instantiated in WebCrawlerMain.  The exact process of picking
+     sequential vs. parallel web crawler is still a complete mystery.
+     */
     Multibinder<WebCrawler> multibinder =
         Multibinder.newSetBinder(binder(), WebCrawler.class, Internal.class);
     multibinder.addBinding().to(SequentialWebCrawler.class);
@@ -64,6 +69,16 @@ public final class WebCrawlerModule extends AbstractModule {
             .build());
   }
 
+  /*
+  This provide function may be where the implementation is specified.
+
+  If the configuration JSON includes an ImplementationOverride key
+  then it streams through the set of WebCrawler implementations.
+  Those implementations are added to a list in the MultiBinder statement
+  above.  So when someone asks for a WebCrawler, they get the class with
+  a name that matches ImplementationOverride.  Remember, these are a set
+  of WebCrawler implementations, not a set of strings.
+   */
   @Provides
   @Singleton
   @Internal
@@ -78,6 +93,16 @@ public final class WebCrawlerModule extends AbstractModule {
           .findFirst()
           .orElseThrow(() -> new ProvisionException("Implementation not found: " + override));
     }
+
+    /*
+    If no ImplementationOverride is specified then we assume a parallel
+    implementation and ensure the parallelism in config is do-able with
+    available processors.  targetParallelism is provided by the function
+    below.  It doesn't really seem to work logically.  provideTargetParallelism
+    returns any number greater than 0 that exists in the configuration.
+    The filter statement below basically compares the config.maxParallelism
+    to itself in a roundabout way.
+     */
     return implementations
         .stream()
         .filter(impl -> targetParallelism <= impl.getMaxParallelism())
@@ -98,6 +123,10 @@ public final class WebCrawlerModule extends AbstractModule {
     return Runtime.getRuntime().availableProcessors();
   }
 
+  /*
+  Because this is Guice and injection, the @Internal annotation can give this
+  function a WebCrawler object specified from the configuration.
+   */
   @Provides
   @Singleton
   WebCrawler provideWebCrawlerProxy(Profiler wrapper, @Internal WebCrawler delegate) {

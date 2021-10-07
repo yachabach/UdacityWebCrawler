@@ -33,6 +33,7 @@ public final class WebCrawlerMain {
   private Profiler profiler;
 
   private void run() throws Exception {
+    //crawler and profiler are instantiated here - thank you Guice
     Guice.createInjector(new WebCrawlerModule(config), new ProfilerModule()).injectMembers(this);
 
     //Crawl the given pages
@@ -52,8 +53,16 @@ public final class WebCrawlerMain {
     } else {
       Path path = Path.of(config.getResultPath());
       resultWriter.write(path);
+      System.out.println(path);
     }
     // TODO: Write the profile data to a text file (or System.out if the file name is empty)
+    if (config.getProfileOutputPath().isEmpty()) {
+      Writer out = new BufferedWriter(new OutputStreamWriter(System.out));
+      profiler.writeData(out);
+    } else {
+      Path path = Path.of(config.getProfileOutputPath());
+      profiler.writeData(path);
+    }
   }
 
   public static void main(String[] args) throws Exception {
