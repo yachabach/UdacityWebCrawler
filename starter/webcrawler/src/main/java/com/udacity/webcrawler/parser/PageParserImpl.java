@@ -68,6 +68,7 @@ final class PageParserImpl implements PageParser {
       return new Result.Builder().build();
     }
 
+    //Ducument is a JSOUP class
     Document document;
     try {
       document = parseDocument(parsedUri);
@@ -78,7 +79,9 @@ final class PageParserImpl implements PageParser {
       return new Result.Builder().build();
     }
 
+    //If we made it this far, prepare a builder for the result
     Result.Builder builder = new Result.Builder();
+
     // Do a single pass over the document to gather all hyperlinks and text.
     document.traverse(new NodeVisitor() {
       @Override
