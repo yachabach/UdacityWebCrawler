@@ -38,3 +38,15 @@ Run at Thu, 7 Oct 2021 22:39:37 GMT
 com.udacity.webcrawler.SequentialWebCrawler#crawl took 0m 2s 402ms
 com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 2s 386ms
 
+Run at Fri, 8 Oct 2021 02:31:49 GMT
+com.udacity.webcrawler.ParallelWebCrawler#crawl took 0m 10s 634ms
+com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 9s 949ms
+
+Run at Fri, 8 Oct 2021 02:35:17 GMT
+com.udacity.webcrawler.ParallelWebCrawler#crawl took 0m 10s 552ms
+com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 10s 197ms
+
+Run at Fri, 8 Oct 2021 02:37:10 GMT
+com.udacity.webcrawler.ParallelWebCrawler#crawl took 0m 10s 35ms
+com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 9s 991ms
+

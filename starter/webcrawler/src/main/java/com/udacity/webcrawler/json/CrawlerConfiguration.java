@@ -308,6 +308,7 @@ public final class CrawlerConfiguration {
      */
     @JsonProperty("resultPath")
     public Builder setResultPath(String resultPath) {
+      this.resultPath = Objects.requireNonNull(resultPath);
       return this;
     }
 
