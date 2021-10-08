@@ -61,13 +61,37 @@ Q3. Analyze your method profiler through the lens of Aspect Oriented Programming
 
     (a) What cross-cutting concern is being addressed by the com.udacity.webcrawler.profiler.Profiler class?
 
+    Performance profiling is the cross-cutting concern addressed by the profiler.
+
     (b) What are the join points of the Profiler in the web crawler program?
+
+    The join points are all the methods annotated with the @Profiled annotation.  These include:
+     - crawl method of the WebCrawler
+     - parse method of the PageParser
 
 
 Q4. Identify three (3) different design patterns used in this project, and explain which interfaces, classes, and/or
     libraries use or implement those design patterns.
 
+    Three design patterns in this project include Creation patterns, Strategy pattern, and Dependency Injection:
+
+    Builder Pattern
+    - Classes - CrawlResult, PageParser.Result, CrawlerConfiguration and CrawlAction
+    - Likes - They are easy to understand and relieve you of the need to remember the order of construction params
+    - Dislikes - They add many lines of code and complexity
+
+    Strategy Pattern
+    - Classes - WebCrawler, SequentialWebCrawler, ParallelWebCrawler
+    - Likes - allows us to try different implementations without changing a lot of code
+    - Dislikes - VERY complicated and difficult to keep all the layers straight in my head
+
+    Dependency Injection
+    - Classes - PageParser, Profiler, numerous variables
+    - Likes - allows us to use objects without having to construct them; cleans the code in a class
+    - Dislikes - VERY hard to understand Guice's syntax.  Acts like global variables, it's hard to know their source
+
     For each pattern, name one thing about the pattern that you LIKED, and one thing you DISLIKED. If you did not like
     anything, you can name two things you disliked.
+
 
 
