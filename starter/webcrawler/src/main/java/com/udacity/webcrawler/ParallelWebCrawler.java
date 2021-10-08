@@ -28,12 +28,16 @@ final class ParallelWebCrawler implements WebCrawler {
   private final Clock clock;
   private final Duration timeout;
   private final int popularWordCount;
+  private final int threadCount;
   private final ForkJoinPool pool;
   private final int maxDepth;
   private final List<Pattern> ignoredUrls;
 
+  //Guice creates parserFactory from the binding in WebCrawlerModule
   @Inject PageParserFactory parserFactory;
 
+  //Guice provides the values for all annotated fields with bindings
+  //from WebCrawlerModule
   @Inject
   ParallelWebCrawler(
       Clock clock,
@@ -45,15 +49,16 @@ final class ParallelWebCrawler implements WebCrawler {
     this.clock = clock;
     this.timeout = timeout;
     this.popularWordCount = popularWordCount;
+    this.threadCount = threadCount;
     this.pool = new ForkJoinPool(Math.min(threadCount, getMaxParallelism()));
     this.ignoredUrls = ignoredUrls;
     this.maxDepth = maxDepth;
   }
 
-  @Override
+  @Override //Must override the abstract class in the WebCrawler Interface
   public CrawlResult crawl(List<String> startingUrls) {
 
-    //Set a timeout
+    //Set a timeout - All recursion stops after timeout
     Instant deadline = clock.instant().plus(timeout);
 
     /*Repositories for word counts and visited urls.  In a parallel
