@@ -50,3 +50,7 @@ Run at Fri, 8 Oct 2021 02:37:10 GMT
 com.udacity.webcrawler.ParallelWebCrawler#crawl took 0m 10s 35ms
 com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 9s 991ms
 
+Run at Sun, 10 Oct 2021 22:21:30 GMT
+com.udacity.webcrawler.ParallelWebCrawler#crawl took 0m 11s 288ms
+com.udacity.webcrawler.parser.PageParserImpl#parse took 0m 11s 261ms
+
